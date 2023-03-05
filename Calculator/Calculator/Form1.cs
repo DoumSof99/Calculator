@@ -14,7 +14,7 @@ namespace Calculator
 {
     public partial class Calculator : Form
     {
-        private bool shouldAddToListAndText = false;
+        private bool shouldAddValueToListAndText = false;
         private bool isOperatorPerforemed = false;
         private List<string> lsSymbols = new List<string>() { "+", "-", "*", "/" };
         private List<string> lsValues = new List<string> ();
@@ -33,45 +33,45 @@ namespace Calculator
             {
                 ctrlText.Text = button.Text;
                 isOperatorPerforemed = true;
-                shouldAddToListAndText = false;
+                shouldAddValueToListAndText = false;
             }
             else
             {
                 ctrlText.Text += button.Text;
                 isOperatorPerforemed = false;
-                shouldAddToListAndText = false;
+                shouldAddValueToListAndText = false;
             }
 
             // TODO: Not add dot after symbol, but if it is 0. then add
-            // TODO: Fix bug with not adding 0 at all
-            if (button.Text == "0")
-            {
-                string text = ctrlOperation.Text;
-                string lastValueInText = text[text.Length - 1].ToString();
+            string text = ctrlOperation.Text;
 
-                foreach (var item in lsSymbols)
+            if (button.Text == "." && !string.IsNullOrEmpty(text))
+            {
+                string lastValueInText = text[text.Length - 1].ToString();
+                shouldAddValueToListAndText = true;
+
+                if (lsSymbols.Contains(lastValueInText))
                 {
-                    if (!text.EndsWith(item) && item == lastValueInText)
-                    {
-                        shouldAddToListAndText = true;
-                    }
+                    shouldAddValueToListAndText = false;
                 }
             }
             else
             {
-                shouldAddToListAndText = true;
+                shouldAddValueToListAndText = true;
             }
+
+
 
             // DONE not to add operation after operation
             if (lsValues.Count > 0)
             {
                 if (lsSymbols.Contains(button.Text) && lsSymbols.Contains(lsValues.Last()))
                 {
-                    shouldAddToListAndText = false;
+                    shouldAddValueToListAndText = false;
                 }
             }
 
-            if (shouldAddToListAndText)
+            if (shouldAddValueToListAndText)
             {
                 ctrlOperation.Text += button.Text;
                 lsValues.Add(button.Text);
