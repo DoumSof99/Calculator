@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -9,55 +10,64 @@ namespace Calculator
 {
     public class Helper
     {
-        public string _button { get; set; }
-
-        public Helper()
+        private List<string> _lsSymbols;
+        private string _operationText;
+        private string _button;
+        public Helper(string operationText, string button, List<string> lsSymbols)
         {
-            
-        }
-
-        public string AddButtonValueToText()
-        {
-            return _button;
-        }
-
-        public string GetlastValueFromOperationText(string operationText)
-        {
-            return !string.IsNullOrEmpty(operationText) ? operationText[operationText.Length - 1].ToString() : null;
-        }
-    }
-
-    public class Numbers : Helper
-    {
-
-        public Numbers(string button)
-        {
+            _operationText = operationText;
             _button = button;
+            _lsSymbols = lsSymbols;
         }
 
-    }
-
-    public class OperationSymbols : Helper
-    {
-        public OperationSymbols(string button)
+        public Helper(string operationText, List<string> lsSymbols)
         {
-            _button = button;
+            _operationText = operationText;
+            _lsSymbols = lsSymbols;
         }
 
-        public bool ValidateOperationNotAddSymbolAfterDot(string operationText, List<string> lsSymbols)
+        public Helper(string operationText)
         {
-            string lastValueInText = GetlastValueFromOperationText(operationText);
-            return lsSymbols.Contains(_button) && lastValueInText == "." ? false : true;
+            _operationText=operationText;
         }
 
-        public bool ValidateOperationNotAddSymbolAfterSymbol(List<string> lsValues, List<string> lsSymbols)
+        public string RemoveLastValueFromOperationText()
         {
-            bool value = true;
-            if (lsValues.Count > 0)
-            {
-                value = lsSymbols.Contains(_button) && lsSymbols.Contains(lsValues.Last()) ? false : true;
-            }
+            return !string.IsNullOrEmpty(_operationText) ? _operationText.Substring(0, _operationText.Length - 1) : _operationText;
+        }
+
+        private string LastValueFromOperationText()
+        {
+            return !string.IsNullOrEmpty(_operationText) ? _operationText.Substring(_operationText.Length - 1)[0].ToString() : string.Empty;
+        }
+
+        public bool ValidateOpertationText()
+        {
+            return CheckForSymbolAfterSymbol() && CheckForSymbolAfterDotAndReverse();
+        }
+
+        private bool CheckForSymbolAfterSymbol()
+        {
+            string lastValueInOperationText = LastValueFromOperationText();
+            return _lsSymbols.Contains(_button) && _lsSymbols.Contains(lastValueInOperationText) 
+                ? false : true;
+        }
+
+        private bool CheckForSymbolAfterDotAndReverse()
+        {
+            string lastValueInOperationText = LastValueFromOperationText();
+            return (_lsSymbols.Contains(_button) && lastValueInOperationText == ".")
+                || (_lsSymbols.Contains(lastValueInOperationText) && _button == ".")
+                ? false : true;
+        }
+
+        public string RemoveLastValueIfSymbolOrDot ()
+        {
+            string value = _operationText;
+            string lastValue = LastValueFromOperationText();
+            if (lastValue == "." || _lsSymbols.Contains(lastValue)) value = RemoveLastValueFromOperationText();
             return value;
         }
+
     }
 }

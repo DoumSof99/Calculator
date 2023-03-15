@@ -268,6 +268,7 @@
             this.ctrlText.ForeColor = System.Drawing.Color.Black;
             this.ctrlText.Location = new System.Drawing.Point(41, 77);
             this.ctrlText.Name = "ctrlText";
+            this.ctrlText.ReadOnly = true;
             this.ctrlText.Size = new System.Drawing.Size(370, 43);
             this.ctrlText.TabIndex = 20;
             this.ctrlText.Text = "0";

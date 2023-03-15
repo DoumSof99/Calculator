@@ -15,12 +15,10 @@ namespace Calculator
 {
     public partial class Calculator : Form
     {
-        private bool shouldAddValueToListAndText = true;
         private bool isOperatorPerforemed = false;
-        private string lastValueInText = string.Empty;
-        private List<string> lsSymbols = new List<string>() { "+", "-", "*", "/" };
-        private List<string> lsValues = new List<string> ();
-        private Regex textHasOnlyZeros = new Regex(@"^0+$"); 
+        private bool isOperationFinihed = false;
+        private readonly List<string> lsSymbols = new List<string>() { "+", "-", "*", "/" };
+
         public Calculator()
         {
             InitializeComponent();
@@ -28,178 +26,52 @@ namespace Calculator
 
         private void Button_click(object sender, EventArgs e)
         {
-            var button = (Button)sender;
-
-            if (ctrlText.Text == "0" || isOperatorPerforemed) // ctrlText.Text == "." || 
-            {
+            if (ctrlText.Text == "0" || isOperatorPerforemed || isOperationFinihed) {
                 ctrlText.Clear();
             }
 
-            Helper helper = new Helper();
+            var button = (Button)sender;
 
-            switch (button.Text.ToString())
-            {
-                case "1":
-                case "2":
-                case "3":
-                case "4":
-                case "5":
-                case "6":
-                case "7":
-                case "8":
-                case "9":
+            if (isOperationFinihed) ctrlOperation.Text = string.Empty;
 
-                    Numbers numbers = new Numbers(button.Text.ToString());
-                    
-                    ctrlText.Text += numbers.AddButtonValueToText();
+            isOperationFinihed = false;
+            isOperatorPerforemed = lsSymbols.Contains(button.Text);
 
-                    isOperatorPerforemed = false;
-
-                    break;
-
-                case "+":
-                case "/":
-                case "-":
-                case "*":
-
-                    OperationSymbols symbols = new OperationSymbols(button.Text.ToString());
-
-                    ctrlText.Text = symbols.AddButtonValueToText();
-
-                    isOperatorPerforemed = true;
-
-                    shouldAddValueToListAndText = symbols.ValidateOperationNotAddSymbolAfterDot(ctrlOperation.Text, lsSymbols);
-                    shouldAddValueToListAndText = symbols.ValidateOperationNotAddSymbolAfterSymbol(lsValues, lsSymbols);
-
-                    break;
-
-                case "0":
-
-                    break;
-
-                case ".":
-
-                    break;
-
-
-                default:
-                    break;
-            }
-
-
-            if (lsSymbols.Contains(button.Text))    
-            {
-                //ctrlText.Text = button.Text;
-                //isOperatorPerforemed = true;
-                //shouldAddValueToListAndText = true;
-            }
-            else
-            {
-                //ctrlText.Text += button.Text;
-                //isOperatorPerforemed = false;
-                //shouldAddValueToListAndText = true;
-            }
-
-            // TODO: Not add dot after symbol, but if it is 0. then add
-            //string text = ctrlOperation.Text;
+            if (ctrlText.Text == ".") ctrlText.Text = "0.";
             
-            lastValueInText = helper.GetlastValueFromOperationText(ctrlOperation.Text); //!string.IsNullOrEmpty(text) ? text[text.Length - 1].ToString(): null;
+            Helper helper = new Helper(ctrlOperation.Text, button.Text, lsSymbols);
 
-            if (button.Text == ".")
-            {
-                shouldAddValueToListAndText = !lsSymbols.Contains(lastValueInText);
-            }
-
-            if (button.Text == "0")
-            {
-                shouldAddValueToListAndText = textHasOnlyZeros.IsMatch(ctrlText.Text);
-            }
-
-            //if (lsSymbols.Contains(button.Text) && lastValueInText == ".")
-            //{
-            //    shouldAddValueToListAndText = false;
-            //}
-
-            // DONE not to add operation after operation
-            if (lsValues.Count > 0)
-            {
-                if (button.Text == "." && button.Text == lsValues.Last()) //(lsSymbols.Contains(button.Text) && lsSymbols.Contains(lsValues.Last())
-                {
-                    shouldAddValueToListAndText = false;
-                }
-            }
-
-            if (shouldAddValueToListAndText)
+            if (helper.ValidateOpertationText())
             {
                 ctrlOperation.Text += button.Text;
-                lsValues.Add(button.Text);
+                ctrlText.Text += button.Text;
             }
-
-
+           
         }
 
-        // TODO: check if C or CE bt should delete the ctrl operationText and/or just the ctrlText
         private void CEButton_click(object sender, EventArgs e)
         {
+            Helper helper = new Helper(ctrlOperation.Text);
+            ctrlOperation.Text = helper.RemoveLastValueFromOperationText();
             ctrlText.Text = "0";
         }
 
         private void CButton_click(object sender, EventArgs e)
         {
             ctrlText.Text = "0";
+            ctrlOperation.Text = string.Empty;
         }
 
         private void EqualButton_click(object sender, EventArgs e)
         {
-            //TODO: 
+            Helper helper = new Helper(ctrlOperation.Text, lsSymbols);
+            ctrlOperation.Text = helper.RemoveLastValueIfSymbolOrDot();
 
+            DataTable table = new DataTable();
+            var result = table.Compute(ctrlOperation.Text, "");
+            ctrlText.Text = result.ToString();
+            ctrlOperation.Text += "=";
+            isOperationFinihed = true;
         }
-
-        // Good thinking, deploy
-        //public void method2()
-        //{
-        //    List<string> inputList = new List<string> { "5", "5", "*", "4", "-", "2" };
-        //    int index = 0;
-        //    int operand1 = 0;
-        //    int operand2 = 0;
-        //    string operation = "";
-        //    while (index < inputList.Count)
-        //    {
-        //        if (int.TryParse(inputList[index], out int num))
-        //        {
-        //            if (operand1 == 0)
-        //            {
-        //                operand1 = num;
-        //            }
-        //            else
-        //            {
-        //                operand2 = num;
-        //                switch (operation)
-        //                {
-        //                    case "+":
-        //                        operand1 += operand2;
-        //                        break;
-        //                    case "-":
-        //                        operand1 -= operand2;
-        //                        break;
-        //                    case "*":
-        //                        operand1 *= operand2;
-        //                        break;
-        //                    case "/":
-        //                        operand1 /= operand2;
-        //                        break;
-        //                }
-        //            }
-        //        }
-        //        else
-        //        {
-        //            operation = inputList[index];
-        //        }
-        //        index++;
-        //    }
-        //    ctrlText.Text = Convert.ToString(operation);
-        //}
-
-
     }
 }
